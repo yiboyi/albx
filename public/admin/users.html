@@ -198,8 +198,8 @@
             <td>{{$value.email}}</td>
             <td>{{$value.nickName}}</td>
             <td>{{$value.status == 1 ? '激活' : '未激活'}}</td>
-            <td>{{$value.role == 'admin' ? '管理员' : '普通用户'}}</td>
-            <td class="text-center">
+            <td>{{$value.role == 'admin' ? '超级管理员' : '普通用户'}}</td>
+            <td class="text-center" data-id="{{$value._id}}">
                 <a href="javascript:;" class="btn btn-default btn-xs edit">编辑</a>
                 <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
             </td>
@@ -268,7 +268,9 @@
         });
 
         //点击编辑功能
+        var id;
         $('tbody').on('click', '.edit', function() {
+            id = $(this).parent().attr('data-id'); //获取到父元素身上的id
             $('form >h2').text('修改用户');
             var trObj = $(this).parents('tr');
             $('#email').val(trObj.children().eq(2).text());
@@ -298,6 +300,38 @@
             }
             $('#addUser').hide(); //添加
             $('#editUser').show(); //修改
+        })
+
+        //给修改按钮注册点击事件
+        $('#editUser').on('click', function() {
+            // serialize 就是用于收集表单数据 只要表单里面的输入框的内容有name属性就会收集到
+            var formData = $('form').serialize();
+            $.ajax({
+                type: 'put',
+                url: '/users/' + id,
+                data: formData,
+                success: function(res) {
+                    // 通过res对象里面的_id属性的值去数组中 userArr这个数组将对应的元素找出来 
+                    // 如果数组里面的元素的_id的值刚好等于了res._id 
+                    var index = userArr.findIndex(item => item._id == res._id);
+                    // 将res这个对象赋值给了userArr这个数组里面的指定的元素
+                    userArr[index] = res;
+                    //重新渲染数据
+                    render(userArr);
+
+                    $('#addUser').show();
+                    $('#editUser').hide();
+                    $('form > h2').text('添加新用户');
+                    $('#img').val("");
+                    $('#prev').attr('src', "../assets/img/default.png");
+                    $('#email').val("");
+                    $('#nickName').val("");
+                    $('#admin').prop('checked', false);
+                    $('#normal').prop('checked', true);
+                    $('#jh').prop('checked', false);
+                    $('#wjh').prop('checked', true);
+                }
+            })
         })
     </script>
     <script>
