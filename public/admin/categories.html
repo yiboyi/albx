@@ -35,8 +35,8 @@
             </div>
             <!-- 有错误信息时展示 -->
             <!-- <div class="alert alert-danger">
-        <strong>错误！</strong>发生XXX错误
-      </div> -->
+              <strong>错误！</strong>发生XXX错误
+            </div> -->
             <div class="row">
                 <div class="col-md-4">
                     <form>
@@ -51,7 +51,7 @@
                         </div>
                         <div class="form-group">
                             <button class="btn btn-primary" type="button" id="cAdd">添加</button>
-                            <button class="btn btn-primary" type="button" id="cEdit" style="display: none">修改</button>
+                            <button class="btn btn-primary" type="button" id="cEdit" style="display: none;">修改</button>
                         </div>
                     </form>
                 </div>
@@ -70,14 +70,15 @@
                         </thead>
                         <tbody>
                             <!-- <tr>
-                                <td class="text-center"><input type="checkbox"></td>
-                                <td>奇趣事</td>
-                                <td>fa-class</td>
-                                <td class="text-center">
-                                    <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
-                                    <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                                </td>
-                            </tr> -->
+                      <td class="text-center"><input type="checkbox"></td>
+                      <td>奇趣事</td>
+                      <td>fa-class</td>
+                      <td class="text-center">
+                        <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
+                        <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+                      </td>
+                    </tr> -->
+
                         </tbody>
                     </table>
                 </div>
@@ -132,7 +133,7 @@
                 <input type="checkbox" data-id="{{$value._id}}"></td>
             <td>{{$value.title}}</td>
             <td>{{$value.className}}</td>
-            <td class="text-center" dota-id={{$value._id}}>
+            <td class="text-center" data-id={{$value._id}}>
                 <a href="javascript:; " class="btn btn-info btn-xs edit ">编辑</a>
                 <a href="javascript:; " class="btn btn-danger btn-xs delete ">删除</a>
             </td>
@@ -173,6 +174,114 @@
             });
             $('tbody').html(str);
         }
+
+        //编辑修改功能
+        var id;
+        $('tbody').on('click', '.edit', function() {
+            id = $(this).parent().attr('data-id');
+            console.log(id);
+
+            $('input[name="title"]').val($(this).parents('tr').children().eq(1).text());
+            $('input[name="className"]').val($(this).parents('tr').children().eq(2).text());
+            $('form >h2').text('修改分类');
+            $('#cAdd').hide();
+            $('#cEdit').show();
+        });
+        $('#cEdit').on('click', function() {
+                $.ajax({
+                    url: '/categories/' + id,
+                    type: 'put',
+                    data: $('form').serialize(),
+                    success: function(res) {
+                        console.log(res);
+
+                        var index = cArr.findIndex(item => item._id == res._id);
+                        cArr[index] = res;
+                        render(cArr)
+                            //清空输入
+                        $('form >h2').text('添加分类');
+                        $('#cAdd').hide();
+                        $('#cEdit').show();
+                        $('input[name="title"]').val('');
+                        $('input[name="className"]').val('');
+                    }
+                })
+            })
+            // 删除分类 
+        $('tbody').on('click', '.delete', function() {
+            if (confirm("你真的休了我吗?")) {
+                var id = $(this).parent().attr('data-id');
+                $.ajax({
+                    type: 'delete',
+                    url: '/categories/' + id,
+                    success: function(res) {
+                        var index = cArr.findIndex(item => item._id == res._id);
+                        cArr.splice(index, 1);
+                        render(cArr);
+                    }
+                });
+            }
+        });
+
+        $('thead input[type="checkbox"]').on('click', function() {
+            var flag = $(this).prop('checked');
+            // tbody里面的复选框的状态是由flag的值来决定的 
+            $('tbody input[type="checkbox"]').prop('checked', flag);
+
+            // 如果上面的复选框已经打上勾了 我们就让批量删除按钮显示 
+            if (flag) {
+                $('.page-action').show();
+            } else {
+                $('.page-action').hide();
+            }
+        });
+
+        $('tbody').on('click', 'input[type="checkbox"]', function() {
+            // 如果下面的复选框选中的个数 恰好等于 它身上的长度  表示下面所有的复选框都已经被选中了 
+            var checkLength = $('tbody input[type="checkbox"]').length; //下面复选框的个数 
+            var cLength = $('tbody input[type="checkbox"]:checked').length;
+
+            if (checkLength == cLength) {
+                $('thead input[type="checkbox"]').prop('checked', true);
+            } else {
+                $('thead input[type="checkbox"]').prop('checked', false);
+            }
+
+            // 如果下面复选框选中的个数大于1 我们就让批量删除按钮显示 
+            if (cLength > 1) {
+                $('.page-action').show();
+            } else {
+                $('.page-action').hide();
+            }
+        });
+
+        $('#allDel').on('click', function() {
+            // 将所有选中的input的这一行删除把 
+            var checkUser = $('tbody input:checked');
+            var ids = [];
+            // 编辑checkUser jQuery对象
+            checkUser.each(function(index, item) {
+                ids.push($(item).attr('data-id'))
+            })
+
+            // 完成 删除多个的功能 
+
+            $.ajax({
+                url: '/categories/' + ids.join('-'),
+                type: 'delete',
+                success: function(res) {
+                    // 返回是一个对象  然后根据这个对象去userArr数组中将对应的索引找到 然后调用 splice()方法 将数组元素删除  要调用render方法 重新渲染  
+                    res.forEach(value => {
+
+                        var index = cArr.findIndex(item => item._id == value._id);
+                        cArr.splice(index, 1);
+                        render(cArr);
+                    });
+
+                }
+            });
+
+        });
     </script>
     <script>
         NProgress.done()
