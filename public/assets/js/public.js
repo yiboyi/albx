@@ -20,3 +20,30 @@ $.ajax({
         $('#randomBox').html(html)
     }
 })
+
+// 向服务器端发送请求 索要最新评论数据
+$.ajax({
+    type: 'get',
+    url: '/comments/lasted',
+    success: function(response) {
+        var commentTpl = `
+			{{each data}}
+			<li>
+			  <a href="javascript:;">
+			    <div class="avatar">
+			      <img src="{{$value.author.avatar}}" alt="">
+			    </div>
+			    <div class="txt">
+			      <p>
+			        <span>{{$value.author && $value.author.nickName}}</span>{{$imports.formateDate($value.createAt)}}说:
+			      </p>
+			      <p>{{$value.content}}</p>
+			    </div>
+			  </a>
+			</li>
+			{{/each}}
+		`;
+        var html = template.render(commentTpl, { data: response });
+        $('#commentBox').html(html);
+    }
+})
