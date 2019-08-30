@@ -119,6 +119,17 @@
                 $('#comment').html('<strong>' + res.commentCount + '</strong>条评论')
             }
         })
+
+        $.ajax({
+            type: 'get',
+            url: '/users/' + userId,
+            success: function(res) {
+                console.log(res);
+                $('.avatar').attr('src', res.avatar)
+                $('.profile .name').html(res.nickName)
+            }
+
+        })
     </script>
     <script>
         NProgress.done()

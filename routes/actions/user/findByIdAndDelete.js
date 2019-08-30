@@ -55,12 +55,14 @@ module.exports = async(req, res) => {
         // 通过验证
         // 删除用户
         let user = await User.findByIdAndDelete(id);
+        //将删除的用户存储在数组中
+        result.push(user);
         // 如果缩略图存在
-        if (user.avatar) {
-            // 删除缩略图
-            await unlink(path.join(__dirname, '../', '../', '../', 'public', user.avatar));
-        }
-        // 响应
+        // if (user.avatar) {
+        //     // 删除缩略图
+        //     await unlink(path.join(__dirname, '../', '../', '../', 'public', user.avatar));
+        // }
+        // // 响应
         res.send(user);
     }
 

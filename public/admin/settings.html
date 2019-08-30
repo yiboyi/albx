@@ -37,44 +37,45 @@
             <!-- <div class="alert alert-danger">
         <strong>错误！</strong>发生XXX错误
       </div> -->
-            <form class="form-horizontal">
+            <form class="form-horizontal" id="settingsForm">
                 <div class="form-group">
                     <label for="site_logo" class="col-sm-2 control-label">网站图标</label>
                     <div class="col-sm-6">
                         <input id="site_logo" name="site_logo" type="hidden">
                         <label class="form-image">
               <input id="logo" type="file">
-              <img src="../assets/img/logo.png">
+              <img src="../assets/img/logo.png" id="preview">
               <i class="mask fa fa-upload"></i>
             </label>
+                        <input type="hidden" name="logo" id="hiddenLogo">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="site_name" class="col-sm-2 control-label">站点名称</label>
                     <div class="col-sm-6">
-                        <input id="site_name" name="site_name" class="form-control" type="type" placeholder="站点名称">
+                        <input id="site_name" name="site_name" class="form-control" type="type" placeholder="站点名称" name="title">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="site_description" class="col-sm-2 control-label">站点描述</label>
                     <div class="col-sm-6">
-                        <textarea id="site_description" name="site_description" class="form-control" placeholder="站点描述" cols="30" rows="6"></textarea>
+                        <textarea id="site_description" name="site_description" class="form-control" placeholder="站点描述" cols="30" rows="6" name="description"></textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="site_keywords" class="col-sm-2 control-label">站点关键词</label>
                     <div class="col-sm-6">
-                        <input id="site_keywords" name="site_keywords" class="form-control" type="type" placeholder="站点关键词">
+                        <input id="site_keywords" name="site_keywords" class="form-control" type="type" placeholder="站点关键词" name="keywords">
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">评论</label>
                     <div class="col-sm-6">
                         <div class="checkbox">
-                            <label><input id="comment_status" name="comment_status" type="checkbox" checked>开启评论功能</label>
+                            <label><input id="comment_status" name="comment_status" type="checkbox" checked name="comment" value="true">开启评论功能</label>
                         </div>
                         <div class="checkbox">
-                            <label><input id="comment_reviewed" name="comment_reviewed" type="checkbox" checked>评论必须经人工批准</label>
+                            <label><input id="comment_reviewed" name="comment_reviewed" type="checkbox" checked name="review" value="true">评论必须经人工批准</label>
                         </div>
                     </div>
                 </div>
@@ -127,6 +128,72 @@
     <script src="../assets/vendors/jquery/jquery.js"></script>
     <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
     <script src="../assets/js/common.js"></script>
+    <script>
+        $('#logo').on('change', function() {
+            var file = this.files[0];
+            console.log(file);
+            var formData = new FormData();
+            formData.append('logo', file);
+            $.ajax({
+                type: 'post',
+                url: '/upload',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    console.log(res);
+                    $('#hiddenLogo').val(res[0].logo)
+                    $('#preview').attr('src', res[0].logo)
+                }
+            });
+        })
+
+        function render() {
+            var html = template('slidesTpl', {
+                data: sArr
+            });
+            $('tbody').html(html);
+        }
+        $('#settingForm').on('submit', function() {
+            var formData = $(this).serialize();
+            $.ajax({
+                type: 'post',
+                url: '/settings',
+                data: formData,
+                success: function() {
+                    renden();
+                }
+
+            })
+            return false;
+        })
+
+        $.ajax({
+            type: 'get',
+            url: '/settings',
+            success: function(res) {
+                if (res) {
+                    //将log储存到隐藏域中
+                    $('#hiddenLogo').val(res.logo)
+                        //将logo显示在页面中
+                    $('#preview').attr('src', res.logo)
+                        //将网站标题显示在页面中
+                    $('input[name="title"]').val(res.title);
+                    $('input[name="description"]').val(res.description);
+                    $('input[name="keywords"]').val(res.keywords);
+                    $('input[name="comment"]').prop('checked', res.comment)
+                    $('input[name="review"]').prop('checked', res.review)
+
+                }
+
+            }
+
+
+        })
+    </script>
+
+
+
     <script>
         NProgress.done()
     </script>
