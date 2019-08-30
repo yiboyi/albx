@@ -182,7 +182,7 @@
         </div>
         <div class="content">
             <div class="article">
-                <div class="breadcrumb">
+                <!-- <div class="breadcrumb">
                     <dl>
                         <dt>当前位置：</dt>
                         <dd><a href="javascript:;">奇趣事</a></dd>
@@ -197,7 +197,7 @@
                     <span>分类: <a href="javascript:;">奇趣事</a></span>
                     <span>阅读: (2421)</span>
                     <span>评论: (143)</span>
-                </div>
+                </div> -->
             </div>
             <div class="panel hots">
                 <h3>热门推荐</h3>
@@ -237,6 +237,52 @@
     <script src="assets/vendors/art-template/template-web.js"></script>
     <script src="assets/js/recommend.js"></script>
     <script src="assets/js/public.js"></script>
+    <script type="text/html" id="postTpl">
+        <div class="breadcrumb">
+            <dl>
+                <dt>当前位置：</dt>
+                <dd><a href="javascript:;">奇趣事</a></dd>
+                <dd>变废为宝！将手机旧电池变为充电宝的Better RE移动电源</dd>
+            </dl>
+        </div>
+        <h2 class="title">
+            <a href="javascript:;">又现酒窝夹笔盖新技能 城里人是不让人活了！</a>
+        </h2>
+        <div class="meta">
+            <span>DUX主题小秘 发布于 2020-06-29</span>
+            <span>分类: <a href="javascript:;">奇趣事</a></span>
+            <span>阅读: (2421)</span>
+            <span>评论: (143)</span>
+        </div>
+    </script>
+    <script>
+        function getUrlParams(name) {
+            var paramsAry = location.search.substr(1).split('&');
+            // 循环数据
+            for (var i = 0; i < paramsAry.length; i++) {
+                var tmp = paramsAry[i].split('=');
+                if (tmp[0] == name) {
+                    return tmp[1];
+                }
+            }
+            return -1;
+        }
+        // 从地址栏中获取文章id
+        var postId = getUrlParams('id');
+        // 评论是否经过人工审核
+        var review;
+        // 向服务器端发送请求 根据文章id获取文章详细信息
+        $.ajax({
+            type: 'get',
+            url: '/posts/' + postId,
+            success: function(res) {
+                console.log(res)
+                var html = template('postTpl', res);
+                $('#article').html(html)
+            }
+        })
+    </script>
+
 </body>
 
 </html>
